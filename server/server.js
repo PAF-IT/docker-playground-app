@@ -1,10 +1,10 @@
 import express from 'express'
 import mysql from 'mysql2'
 
-const mysql_host = 'paf-admin-mysql'
+const mysql_host = process.env.MYSQL_HOST
 const mysql_port = process.env.MYSQL_PORT ? Number(process.env.PORT) : 3306
-const mysql_database = process.env.MYSQL_DB_NAME ?? 'paf-admin'
-const mysql_user = process.env.MYSQL_USER ?? 'paf-admin'
+const mysql_database = process.env.MYSQL_DATABASE
+const mysql_user = process.env.MYSQL_USER
 const mysql_pwd = process.env.MYSQL_PASSWORD
 
 const app = express()
@@ -31,7 +31,7 @@ try {
 
     // Routes
     app.get('/demo', (req, res) => {
-        connection.execute('SELECT * from data WHERE 1 = 1;', (_err, rows) => res.send( rows))
+        connection.execute('SELECT * from data WHERE 1 = 1;', (_err, rows) => res.send(rows))
     })
 
     // Listen
