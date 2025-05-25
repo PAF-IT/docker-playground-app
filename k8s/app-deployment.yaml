@@ -40,6 +40,8 @@ spec:
               configMapKeyRef:
                 name: paf-admin-app
                 key: mysql_user
+          - name: SERVER_PORT
+            value: '${SERVER_PORT}'
         ports:
-        - containerPort: 3333
+        - containerPort: ${SERVER_PORT}
           name: app

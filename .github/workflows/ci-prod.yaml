@@ -1,0 +1,62 @@
+name: [PROD] Docker Build, Upload and Kubernetes Deploy
+
+on:
+  push:
+    branches: master
+    tags: releases/v[1-9]+.[0-9]+.[0-9]+
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    env:
+#     Set environment variables for DEV:
+      K8S_CONTEXT: prod
+      SERVER_PORT: 3333
+      IMAGE_TAG: paf-admin-app-prod
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push container image to GitHub Container Registry
+        id: build
+        run: |
+          IMAGE="ghcr.io/paf-it/paf-admin-app:${{ github.sha }}"
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+          docker build --build-arg SERVER_PORT=$SERVER_PORT . --tag $IMAGE_TAG
+          docker tag paf-admin-app $IMAGE
+          docker push $IMAGE
+
+      - name: Set kubectl Context
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.UPCLOUD_KUBECONFIG }}
+          context: $K8S_CONTEXT
+
+      - name: Deploy to Kubernetes
+        uses: swdotcom/update-and-apply-kubernetes-configs@v1
+        with:
+          k8-config-file-paths: |
+            k8s/app-configmap.yaml
+            k8s/app-service.yaml
+            k8s/app-deployment.yaml
+          replacement-method: defined
+        env:
+          IMAGE: ${{ steps.build.outputs.image }}
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          SERVER_PORT: $SERVER_PORT

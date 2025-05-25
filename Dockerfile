@@ -1,3 +1,5 @@
+ARG SERVER_PORT=3333
+
 FROM node:alpine AS build
 
 # client
@@ -20,8 +22,8 @@ COPY server .
 # Build the backend
 RUN npm install --production
 
-# Expose port 3333
-EXPOSE 3333
+# Expose port
+EXPOSE ${SERVER_PORT}
 
 # Launch the server
 CMD ["npm", "run", "start"]

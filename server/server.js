@@ -6,6 +6,7 @@ const mysql_port = process.env.MYSQL_PORT ? Number(process.env.PORT) : 3306
 const mysql_database = process.env.MYSQL_DATABASE
 const mysql_user = process.env.MYSQL_USER
 const mysql_pwd = process.env.MYSQL_PASSWORD
+const server_port = process.env.SERVER_PORT || 3333
 
 const app = express()
 
@@ -35,8 +36,8 @@ try {
     })
 
     // Listen
-    app.listen(3333, '0.0.0.0', () => {
-        console.log(`[ ready ] http://localhost:3333`)
+    app.listen(server_port, '0.0.0.0', () => {
+        console.log(`[ ready ] http://localhost:` + server_port)
     })
 } catch (e) {
     console.error(e)
