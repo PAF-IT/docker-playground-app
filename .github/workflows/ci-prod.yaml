@@ -1,4 +1,4 @@
-name: PROD - Docker Build, Upload and Kubernetes Deploy
+name: PROD - Build and Deploy
 
 on:
   push:
