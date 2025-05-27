@@ -8,7 +8,7 @@
   })
 </script>
 
-<h2>Docker Playground Test App</h2>
+<h2>Docker Playground Test App - Development</h2>
 <div>
   Database entries: {#each data as entry}
     {JSON.stringify(entry)}
