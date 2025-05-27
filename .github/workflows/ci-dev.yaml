@@ -1,18 +1,19 @@
-name: DEV Docker Build, Upload and Kubernetes Deploy
+name: DEV - Docker Build, Upload and Kubernetes Deploy
 
 on:
   push:
     branches: dev
+
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
     env:
-#     Set environment variables for DEV:
+      # Set global action env variables for DEV:
+      IMAGE_TAG: paf-admin-app-dev
       K8S_CONTEXT: dev
       SERVER_PORT: 5000
-      IMAGE_TAG: paf-admin-app-dev
 
     permissions:
       contents: read
@@ -37,15 +38,6 @@ jobs:
           docker build --build-arg SERVER_PORT=${{ env.SERVER_PORT }} . --tag ${{ env.IMAGE_TAG }}
           docker tag ${{ env.IMAGE_TAG }} $IMAGE
           docker push $IMAGE
-
-#      - name: Echo values
-#        run: |
-#          IMAGE="ghcr.io/paf-it/paf-admin-app:${{ github.sha }}"
-#          echo "image=$IMAGE"
-#          echo "docker build --build-arg SERVER_PORT=$SERVER_PORT . --tag $IMAGE_TAG"
-#          echo "docker tag paf-admin-app $IMAGE"
-#          echo "docker push $IMAGE"
-#          echo "K8S_CONTEXT=$K8S_CONTEXT"
 
       - name: Set kubectl Context
         uses: azure/k8s-set-context@v4
