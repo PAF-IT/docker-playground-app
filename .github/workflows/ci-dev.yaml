@@ -1,4 +1,4 @@
-name: DEV - Docker Build, Upload and Kubernetes Deploy
+name: DEV - Build and Deploy
 
 on:
   push:
