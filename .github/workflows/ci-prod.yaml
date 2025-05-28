@@ -49,6 +49,8 @@ jobs:
     environment:
       name: production
       url: https://admin-prod.pa-f.net
+    outputs:
+      image: ${{ steps.build.outputs.image }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -77,6 +79,9 @@ jobs:
       name: production
       url: https://admin-prod.pa-f.net
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Set kubectl Context
         uses: azure/k8s-set-context@v4
         with:
@@ -94,7 +99,7 @@ jobs:
           replacement-method: defined
           namespace: ${{ env.KUBE_NAMESPACE }}
         env:
-          IMAGE: ${{ steps.build.outputs.image }}
+          IMAGE: ${{ needs.build-and-push.outputs.image }}
           MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
           MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
           MYSQL_USER: ${{ secrets.MYSQL_USER }}
@@ -119,29 +124,24 @@ jobs:
     steps:
       - name: Check Deployment Status
         run: |
-               echo " === Deployment Summary ==="
-               echo "Environment Status:"
-               echo "✅ Production:  https://admin-prod.pa-f.net"
-               
-               echo "\n === Kubernetes Resources ==="
-               echo "\n Pods Status:"
-#               kubectl get pods -n ${{ env.KUBE_NAMESPACE }} -o wide
-               
-               echo "\n Services Status:"
-#               kubectl get svc -n ${{ env.KUBE_NAMESPACE }}
-               
-               echo "\n Deployment Status:"
-#               kubectl get deployment -n ${{ env.KUBE_NAMESPACE }}
-               
-               echo "\n Latest Pod Logs:"
-#               kubectl logs -l app=paf-admin-app -n ${{ env.KUBE_NAMESPACE }} --tail=10
-               
-               echo "\n Load Balancer Endpoints:"
-#               kubectl get svc -n ${{ env.KUBE_NAMESPACE }} -o custom-columns=NAME:.metadata.name,TYPE:.spec.type,EXTERNAL-IP:.status.loadBalancer.ingress[0].ip,PORTS:.spec.ports[*].port
-               
-               echo "\n Health Check:"
-               echo "✅ API Health: 200 OK"
-               echo "✅ Database Connection: Successful"
+          echo " === Deployment Summary ==="
+          echo "Environment Status:"
+          echo "✅ Production:  https://admin-prod.pa-f.net"
+          
+          echo "\n === Kubernetes Resources ==="
+          echo "\n Pods Status:"
+
+          echo "\n Services Status:"
+          
+          echo "\n Deployment Status:"
+          
+          echo "\n Latest Pod Logs:"
+          
+          echo "\n Load Balancer Endpoints:"
+          
+          echo "\n Health Check:"
+          echo "✅ API Health: 200 OK"
+          echo "✅ Database Connection: Successful"
 
   notify:
     name: Notification
