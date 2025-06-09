@@ -3,11 +3,10 @@ kind: Service
 metadata:
   name: paf-admin-app
   labels:
-    app: paf-admin
+    app: paf-admin-app
 spec:
   ports:
     - port: ${SERVER_PORT}
   selector:
-    app: paf-admin
-    tier: app
+    app: paf-admin-app
   type: LoadBalancer

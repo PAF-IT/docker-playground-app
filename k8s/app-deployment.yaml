@@ -3,19 +3,17 @@ kind: Deployment
 metadata:
   name: paf-admin-app
   labels:
-    app: paf-admin
+    app: paf-admin-app
 spec:
   selector:
     matchLabels:
-      app: paf-admin
-      tier: app
+      app: paf-admin-app
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: paf-admin
-        tier: app
+        app: paf-admin-app
     spec:
       containers:
       - image: ${IMAGE}
@@ -44,4 +42,4 @@ spec:
             value: '${SERVER_PORT}'
         ports:
         - containerPort: ${SERVER_PORT}
-          name: app
+          name: paf-admin-app
