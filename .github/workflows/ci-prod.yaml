@@ -5,7 +5,7 @@ on:
     branches: master
 
 env:
-  # Set global action env variables for DEV:
+  # Set global action env variables for PROD:
   IMAGE_TAG: paf-admin-app-prod
   KUBE_NAMESPACE: prod
   SERVER_PORT: 443
