@@ -1,12 +1,12 @@
 name: PROD - Build and Deploy
 
 on:
-#  push:
-#    branches: master
-  workflow_dispatch
+  push:
+    branches: master
 
 env:
   # Set global action env variables for PROD:
+  NODE_VERSION: 'latest'
   IMAGE_TAG: paf-admin-app-prod
   KUBE_NAMESPACE: prod
   SERVER_PORT: 443
@@ -17,10 +17,33 @@ jobs:
     name: Code Quality & Tests
     runs-on: ubuntu-latest
     steps:
-      - name: Run ESLint
+      - name: Install NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Code Checkout
+        uses: actions/checkout@v2
+
+      - name: Client - Install Dependencies
+        working-directory: client
+        run: npm ci
+
+      - name: Client - Code Linting
+        working-directory: client
         run: |
-          echo "Running ESLint checks..."
-          echo "Mock ESLint passed ✅"
+          npm run lint
+          echo "ESLint passed ✅"
+
+      - name: Server - Install Dependencies
+        working-directory: server
+        run: npm ci
+
+      - name: Server - Code Linting
+        working-directory: server
+        run: |
+          npm run lint
+          echo "ESLint passed ✅"
 
       - name: Run Unit Tests
         run: |

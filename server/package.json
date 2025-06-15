@@ -8,7 +8,9 @@
   "main": "server.js",
   "scripts": {
     "dev": "node --env-file=.env server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "lint:js": "eslint ./*.js",
+    "lint": "npm run lint:js"
   },
   "dependencies": {
     "express": "^5.1.0",
