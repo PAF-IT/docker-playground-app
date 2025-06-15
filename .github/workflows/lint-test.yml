@@ -4,7 +4,7 @@ on:
   workflow_dispatch
 
 env:
-  NODE_VERSION: latest
+  NODE_VERSION: 'latest'
 
 jobs:
   linting:
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install NodeJS
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -20,13 +20,17 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Client - Install Dependencies
-        run: client/npm ci
+        working-directory: client
+        run: npm ci
 
       - name: Client - Code Linting
-        run: client/npm run lint
+        working-directory: client
+        run: npm run lint
 
       - name: Server - Install Dependencies
-        run: server/npm ci
+        working-directory: server
+        run: npm ci
 
       - name: Server - Code Linting
-        run: server/npm run lint
+        working-directory: server
+        run: npm run lint
