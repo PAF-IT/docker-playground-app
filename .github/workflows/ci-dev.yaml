@@ -1,8 +1,9 @@
 name: DEV - Build and Deploy
 
 on:
-  push:
-    branches: dev
+#  push:
+#    branches: dev
+  workflow_dispatch
 
 env:
   # Set global action env variables for DEV:

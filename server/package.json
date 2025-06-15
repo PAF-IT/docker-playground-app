@@ -8,10 +8,17 @@
   "main": "server.js",
   "scripts": {
     "dev": "node --env-file=.env server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "lint:js": "eslint ./*.js",
+    "lint": "npm run lint:js"
   },
   "dependencies": {
     "express": "^5.1.0",
     "mysql2": "^3.14.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.29.0",
+    "eslint": "^9.29.0",
+    "globals": "^16.2.0"
   }
 }
