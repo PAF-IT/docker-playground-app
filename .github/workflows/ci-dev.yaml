@@ -1,8 +1,9 @@
 name: DEV - Build and Deploy
 
 on:
-  push:
-    branches: dev
+#  push:
+#    branches: dev
+  workflow_dispatch
 
 env:
   # Set global action env variables for DEV:
@@ -50,22 +51,9 @@ jobs:
           echo "Running Unit Tests..."
           echo "Mock tests passed ✅"
 
-  security-scan:
-    name: Security Scanning
-    needs: lint-and-test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Run Security Scan
-        run: |
-          echo "Running Security Scans..."
-          echo "✅ Dependencies scan completed"
-          echo "✅ Code security scan completed"
-          echo "✅ Container security scan completed"
-          echo "No critical vulnerabilities found 🛡️"
-
   build-and-push:
-    name: Build & Push
-    needs: security-scan
+    name: Build, Security Scanning & Push
+    needs: lint-and-test
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -94,6 +82,16 @@ jobs:
           docker build --build-arg SERVER_PORT=${{ env.SERVER_PORT }} . --tag ${{ env.IMAGE_TAG }}
           docker tag ${{ env.IMAGE_TAG }} $IMAGE
           docker push $IMAGE
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ steps.build.outputs.image }}
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
 
   deploy-dev:
     name: Deploy to DEV
@@ -129,18 +127,6 @@ jobs:
           MYSQL_USER: ${{ secrets.MYSQL_USER }}
           SERVER_PORT: ${{ env.SERVER_PORT }}
 
-  integration-tests:
-    name: Integration Tests
-    needs: deploy-dev
-    runs-on: ubuntu-latest
-    steps:
-      - name: Run Integration Tests
-        run: |
-          echo "Running Integration Tests..."
-          echo "✅ API Integration Tests Passed"
-          echo "✅ UI Integration Tests Passed"
-          echo "✅ Performance Tests Passed"
-
   verify-deployment:
     name: Verify Deployment
     needs: deploy-dev
@@ -151,25 +137,30 @@ jobs:
           echo " === Deployment Summary ==="
           echo "Environment Status:"
           echo "✅ Development: https://admin-dev.pa-f.net"
-          
           echo "\n === Kubernetes Resources ==="
           echo "\n Pods Status:"
-          
           echo "\n Services Status:"
-          
           echo "\n Deployment Status:"
-          
           echo "\n Latest Pod Logs:"
-          
           echo "\n Load Balancer Endpoints:"
-          
           echo "\n Health Check:"
           echo "✅ API Health: 200 OK"
           echo "✅ Database Connection: Successful"
 
+  integration-tests:
+    name: Integration Tests
+    needs: verify-deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Integration Tests
+        run: |
+          echo "Running Integration Tests..."
+          echo "✅ API Integration Tests Passed"
+          echo "✅ UI Integration Tests Passed"
+          echo "✅ Performance Tests Passed"
+
   notify:
     name: Notification
-    needs: verify-deployment
     runs-on: ubuntu-latest
     steps:
       - name: Send Deployment Notification
