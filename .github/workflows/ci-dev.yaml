@@ -132,18 +132,32 @@ jobs:
     needs: deploy-dev
     runs-on: ubuntu-latest
     steps:
+      - name: Set kubectl Context
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.UPCLOUD_KUBECONFIG }}
+          context: ${{ env.KUBE_NAMESPACE }}
+
       - name: Check Deployment Status
         run: |
-          echo " === Deployment Summary ==="
-          echo "Environment Status:"
-          echo "✅ Development: https://admin-dev.pa-f.net"
-          echo "\n === Kubernetes Resources ==="
-          echo "\n Pods Status:"
-          echo "\n Services Status:"
-          echo "\n Deployment Status:"
-          echo "\n Latest Pod Logs:"
-          echo "\n Load Balancer Endpoints:"
-          echo "\n Health Check:"
+          echo "\n🔍 === Kubernetes Resources ==="
+          echo "\n📦 Pods Status:"
+          kubectl get pods -n ${{ env.KUBE_NAMESPACE }} -o wide
+          
+          echo "\n🌐 Services Status:"
+          kubectl get svc -n ${{ env.KUBE_NAMESPACE }}
+          
+          echo "\n📈 Deployment Status:"
+          kubectl get deployment -n ${{ env.KUBE_NAMESPACE }}
+          
+          echo "\n📝 Latest Pod Logs:"
+          kubectl logs -l app=frontend -n ${{ env.KUBE_NAMESPACE }} --tail=20
+          
+          echo "\n🔗 Load Balancer Endpoints:"
+          kubectl get svc -n ${{ env.KUBE_NAMESPACE }} -o custom-columns=NAME:.metadata.name,TYPE:.spec.type,EXTERNAL-IP:.status.loadBalancer.ingress[0].ip,PORTS:.spec.ports[*].port
+          
+          echo "\n🏥 Health Check:"
           echo "✅ API Health: 200 OK"
           echo "✅ Database Connection: Successful"
 
