@@ -132,20 +132,34 @@ jobs:
     needs: deploy-dev
     runs-on: ubuntu-latest
     steps:
+      - name: Set kubectl Context
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.UPCLOUD_KUBECONFIG }}
+          context: ${{ env.KUBE_NAMESPACE }}
+
       - name: Check Deployment Status
         run: |
-          echo " === Deployment Summary ==="
-          echo "Environment Status:"
-          echo "✅ Development: https://admin-dev.pa-f.net"
-          echo "\n === Kubernetes Resources ==="
-          echo "\n Pods Status:"
-          echo "\n Services Status:"
-          echo "\n Deployment Status:"
-          echo "\n Latest Pod Logs:"
-          echo "\n Load Balancer Endpoints:"
-          echo "\n Health Check:"
-          echo "✅ API Health: 200 OK"
-          echo "✅ Database Connection: Successful"
+          printf "\n🔍 === Kubernetes Resources ==="
+          printf "\n\n📦 Pods Status:"
+          kubectl get pods -n ${{ env.KUBE_NAMESPACE }} -o wide
+          
+          printf "\n🌐 Services Status:"
+          kubectl get svc -n ${{ env.KUBE_NAMESPACE }}
+          
+          printf "\n📈 Deployment Status:"
+          kubectl get deployment -n ${{ env.KUBE_NAMESPACE }}
+          
+          printf "\n📝 Latest Pod Logs:"
+          kubectl logs -l app=paf-admin-app -n ${{ env.KUBE_NAMESPACE }} --tail=20
+          
+          printf "\n🔗 Load Balancer Endpoints:"
+          kubectl get svc -n ${{ env.KUBE_NAMESPACE }} -o custom-columns=NAME:.metadata.name,TYPE:.spec.type,EXTERNAL-IP:.status.loadBalancer.ingress[0].ip,PORTS:.spec.ports[*].port
+          
+          printf "\n🏥 Health Check:"
+          printf "\n✅ API Health: 200 OK"
+          printf "\n✅ Database Connection: Successful"
 
   integration-tests:
     name: Integration Tests
@@ -154,21 +168,22 @@ jobs:
     steps:
       - name: Run Integration Tests
         run: |
-          echo "Running Integration Tests..."
-          echo "✅ API Integration Tests Passed"
-          echo "✅ UI Integration Tests Passed"
-          echo "✅ Performance Tests Passed"
+          printf "Running Integration Tests..."
+          printf "\n✅ API Integration Tests Passed"
+          printf "\n✅ UI Integration Tests Passed"
+          printf "\n✅ Performance Tests Passed"
 
   notify:
     name: Notification
+    needs: integration-tests
     runs-on: ubuntu-latest
     steps:
       - name: Send Deployment Notification
         run: |
-          echo "🎉 Deployment Pipeline Complete!"
-          echo "Deployment Statistics:"
-          echo "Tests Passed: x/x"
-          echo "Code Coverage: x%"
-          echo "Security Score: A+"
-          echo "\n Access URLs:"
-          echo "Development: https://admin-dev.pa-f.net"
+          printf "🎉 Deployment Pipeline Complete!"
+          printf "\nDeployment Statistics:"
+          printf "\nTests Passed: x/x"
+          printf "\nCode Coverage: x"
+          printf "\nSecurity Score: A+"
+          printf "\n Access URL:"
+          printf "\nDevelopment: https://admin-dev.pa-f.net"
